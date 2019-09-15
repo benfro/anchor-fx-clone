@@ -40,190 +40,205 @@ import java.util.Objects;
  */
 public final class DockUIPanel extends Pane {
 
-   public static final double BAR_HEIGHT = 25;
+    public static final double BAR_HEIGHT = 25;
+    private Label titleLabel;
+    private Pane barPanel;
+    private DockCommandsBox commandsBox;
+    private ImageView iconView;
 
-   private Node nodeContent;
-   private Label titleLabel;
+    private Node nodeContent;
+    private StackPane contentPanel;
+    private DockNode node;
+    private Point2D deltaDragging;
+    private boolean subStationStype;
 
-   private Pane barPanel;
-   private StackPane contentPanel;
+    boolean noTitleBar = false;
 
-   private DockCommandsBox commandsBox;
+    private DockUIPanel() {
 
-   private DockNode node;
+    }
 
-   private Point2D deltaDragging;
+    public DockUIPanel(String title, Node nodeContent, boolean subStationStype, Image imageIcon) {
 
-   private boolean subStationStype;
+        Objects.requireNonNull(nodeContent);
+        Objects.requireNonNull(title);
 
-   private ImageView iconView;
+        noTitleBar = title.isEmpty();
 
-   private DockUIPanel() {
+        this.subStationStype = subStationStype;
+        this.nodeContent = nodeContent;
 
-   }
+        getStylesheets().add("anchorfx.css");
 
-   public DockUIPanel(String title, Node nodeContent, boolean subStationStype, Image imageIcon) {
+        buildNode(title, imageIcon, !noTitleBar);
 
-      Objects.requireNonNull(nodeContent);
-      Objects.requireNonNull(title);
+        if (!noTitleBar)
+            installDragEventMananger();
+    }
 
-      this.subStationStype = subStationStype;
-      this.nodeContent = nodeContent;
+    public void setIcon(Image icon) {
+        if (!noTitleBar) {
+            Objects.requireNonNull(icon);
+            iconView.setImage(icon);
+        }
+    }
 
-      getStylesheets().add("anchorfx.css");
+    private void makeCommands() {
+        commandsBox = new DockCommandsBox(node);
+        barPanel.getChildren().add(commandsBox);
 
-      buildNode(title, imageIcon);
+        commandsBox.layoutXProperty().bind(barPanel.prefWidthProperty().subtract(commandsBox.getChildren().size() * 30 + 10));
+        commandsBox.setLayoutY(0);
 
-      installDragEventMananger();
-   }
+        if (Objects.nonNull(titleLabel))
+            titleLabel.prefWidthProperty().bind(commandsBox.layoutXProperty().subtract(10));
+    }
 
-   public void setIcon(Image icon) {
-      Objects.requireNonNull(icon);
-      iconView.setImage(icon);
-   }
+    public void setDockNode(DockNode node) {
+        this.node = node;
+        if (!noTitleBar)
+            makeCommands();
+    }
 
-   private void makeCommands() {
-      commandsBox = new DockCommandsBox(node);
-      barPanel.getChildren().add(commandsBox);
+    public StringProperty titleProperty() {
+        return titleLabel.textProperty();
+    }
 
-      commandsBox.layoutXProperty().bind(barPanel.prefWidthProperty().subtract(commandsBox.getChildren().size() * 30 + 10));
-      commandsBox.setLayoutY(0);
+    private void installDragEventMananger() {
 
-      titleLabel.prefWidthProperty().bind(commandsBox.layoutXProperty().subtract(10));
-   }
+        barPanel.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+                node.maximizeOrRestore();
+            }
+        });
 
-   public void setDockNode(DockNode node) {
-      this.node = node;
-      makeCommands();
-   }
+        barPanel.setOnMouseDragged(event -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+                manageDragEvent(event);
+            }
+        });
+        barPanel.setOnMouseReleased(event -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+                manageReleaseEvent();
+            }
+        });
+    }
 
-   public StringProperty titleProperty() {
-      return titleLabel.textProperty();
-   }
-
-   private void installDragEventMananger() {
-
-      barPanel.setOnMouseClicked(event -> {
-         if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-            node.maximizeOrRestore();
-         }
-      });
-
-      barPanel.setOnMouseDragged(event -> {
-         if (event.getButton() == MouseButton.PRIMARY) {
-            manageDragEvent(event);
-         }
-      });
-      barPanel.setOnMouseReleased(event -> {
-         if (event.getButton() == MouseButton.PRIMARY) {
-            manageReleaseEvent();
-         }
-      });
-   }
-
-   private void manageDragEvent(MouseEvent event) {
-      if (!node.draggingProperty().get()) {
-
-         if (!node.maximizingProperty().get()) {
-            Bounds bounds = node.localToScreen(barPanel.getBoundsInLocal());
-
-            deltaDragging = new Point2D(event.getScreenX() - bounds.getMinX(),
-                    event.getScreenY() - bounds.getMinY());
-
-            node.enableDraggingOnPosition(event.getScreenX() - deltaDragging.getX(), event.getScreenY() - deltaDragging.getY());
-         }
-
-      } else {
-         if (node.getFloatableStage() != null && !node.getFloatableStage().inResizing() && node.draggingProperty().get()) {
+    private void manageDragEvent(MouseEvent event) {
+        if (!node.draggingProperty().get()) {
 
             if (!node.maximizingProperty().get()) {
-               node.moveFloatable(event.getScreenX() - deltaDragging.getX(),
-                       event.getScreenY() - deltaDragging.getY());
+                Bounds bounds = node.localToScreen(barPanel.getBoundsInLocal());
 
-               //node.stationProperty().get().searchTargetNode(event.getScreenX(), event.getScreenY());
-               AnchorageSystem.searchTargetNode(event.getScreenX(), event.getScreenY());
+                deltaDragging = new Point2D(event.getScreenX() - bounds.getMinX(),
+                        event.getScreenY() - bounds.getMinY());
+
+                node.enableDraggingOnPosition(event.getScreenX() - deltaDragging.getX(), event.getScreenY() - deltaDragging.getY());
             }
-         }
-      }
-   }
 
-   private void manageReleaseEvent() {
-      if (node.draggingProperty().get() && !node.maximizingProperty().get()) {
-         AnchorageSystem.finalizeDragging();
-      }
-   }
+        } else {
+            if (node.getFloatableStage() != null && !node.getFloatableStage().inResizing() && node.draggingProperty().get()) {
 
-   private void buildNode(String title, Image iconImage) {
+                if (!node.maximizingProperty().get()) {
+                    node.moveFloatable(event.getScreenX() - deltaDragging.getX(),
+                            event.getScreenY() - deltaDragging.getY());
 
-      Objects.requireNonNull(iconImage);
-      Objects.requireNonNull(title);
+                    //node.stationProperty().get().searchTargetNode(event.getScreenX(), event.getScreenY());
+                    AnchorageSystem.searchTargetNode(event.getScreenX(), event.getScreenY());
+                }
+            }
+        }
+    }
 
-      String titleBarStyle = (!subStationStype) ? "docknode-title-bar" : "substation-title-bar";
-      barPanel = makeBarPanel(titleBarStyle);
+    private void manageReleaseEvent() {
+        if (node.draggingProperty().get() && !node.maximizingProperty().get()) {
+            AnchorageSystem.finalizeDragging();
+        }
+    }
 
-      iconView = makeIconView(iconImage);
+    private void buildNode(String title, Image iconImage, boolean withTitleBar) {
 
-      String titleTextStyle = (!subStationStype) ? "docknode-title-text" : "substation-title-text";
-      titleLabel = new Label(title);
-      titleLabel.getStyleClass().add(titleTextStyle);
-      barPanel.getChildren().addAll(iconView, titleLabel);
-      titleLabel.relocate(25, 5);
+        Objects.requireNonNull(iconImage);
+        if (withTitleBar) {
 
-      contentPanel = new StackPane();
-      contentPanel.getStyleClass().add("docknode-content-panel");
-      contentPanel.relocate(0, BAR_HEIGHT);
-      contentPanel.prefWidthProperty().bind(widthProperty());
-      contentPanel.prefHeightProperty().bind(heightProperty().subtract(BAR_HEIGHT));
-      contentPanel.getChildren().add(nodeContent);
+            Objects.requireNonNull(title);
 
-      contentPanel.setCache(true);
-      contentPanel.setCacheHint(CacheHint.SPEED);
+            String titleBarStyle = (!subStationStype) ? "docknode-title-bar" : "substation-title-bar";
+            barPanel = makeBarPanel(titleBarStyle);
 
-      if (nodeContent instanceof Pane) {
-         Pane nodeContentPane = (Pane) nodeContent;
-         nodeContentPane.setMinHeight(USE_COMPUTED_SIZE);
-         nodeContentPane.setMinWidth(USE_COMPUTED_SIZE);
-         nodeContentPane.setMaxWidth(USE_COMPUTED_SIZE);
-         nodeContentPane.setMaxHeight(USE_COMPUTED_SIZE);
-      }
+            iconView = makeIconView(iconImage);
 
-      getChildren().addAll(barPanel, contentPanel);
-   }
+            String titleTextStyle = (!subStationStype) ? "docknode-title-text" : "substation-title-text";
+            titleLabel = new Label(title);
+            titleLabel.getStyleClass().add(titleTextStyle);
+            barPanel.getChildren().addAll(iconView, titleLabel);
+            titleLabel.relocate(25, 5);
+        }
 
-   private ImageView makeIconView(Image iconImage) {
-      ImageView iconView = new ImageView(iconImage);
-      iconView.setFitWidth(15);
-      iconView.setFitHeight(15);
-      iconView.setPreserveRatio(false);
-      iconView.setSmooth(true);
-      iconView.relocate(1, (BAR_HEIGHT - iconView.getFitHeight()) / 2);
-      return iconView;
-   }
+        contentPanel = new StackPane();
+        contentPanel.getStyleClass().add("docknode-content-panel");
+        if (withTitleBar)
+            contentPanel.relocate(0, BAR_HEIGHT);
+        contentPanel.prefWidthProperty().bind(widthProperty());
+        if (withTitleBar) {
+            contentPanel.prefHeightProperty().bind(heightProperty().subtract(BAR_HEIGHT));
+        } else {
+            contentPanel.prefHeightProperty().bind(heightProperty());
+        }
+        contentPanel.getChildren().add(nodeContent);
 
-   private Pane makeBarPanel(String titleBarStyle) {
-      Pane barPanel = new Pane();
-      barPanel.getStyleClass().add(titleBarStyle);
-      barPanel.setPrefHeight(BAR_HEIGHT);
-      barPanel.relocate(0, 0);
-      barPanel.prefWidthProperty().bind(widthProperty());
-      return barPanel;
-   }
+        contentPanel.setCache(true);
+        contentPanel.setCacheHint(CacheHint.SPEED);
 
-   public StackPane getContentContainer() {
-      return contentPanel;
-   }
+        if (nodeContent instanceof Pane) {
+            Pane nodeContentPane = (Pane) nodeContent;
+            nodeContentPane.setMinHeight(USE_COMPUTED_SIZE);
+            nodeContentPane.setMinWidth(USE_COMPUTED_SIZE);
+            nodeContentPane.setMaxWidth(USE_COMPUTED_SIZE);
+            nodeContentPane.setMaxHeight(USE_COMPUTED_SIZE);
+        }
 
-   /**
-    * Get the value of nodeContent
-    *
-    * @return the value of nodeContent
-    */
-   public Node getNodeContent() {
-      return nodeContent;
-   }
+        if (withTitleBar) {
+            getChildren().addAll(barPanel, contentPanel);
+        } else {
+            getChildren().addAll(contentPanel);
+        }
+    }
 
-   public boolean isMenuButtonEnable() {
-      return commandsBox.isMenuButtonEnable();
-   }
+    private ImageView makeIconView(Image iconImage) {
+        ImageView iconView = new ImageView(iconImage);
+        iconView.setFitWidth(15);
+        iconView.setFitHeight(15);
+        iconView.setPreserveRatio(false);
+        iconView.setSmooth(true);
+        iconView.relocate(1, (BAR_HEIGHT - iconView.getFitHeight()) / 2);
+        return iconView;
+    }
+
+    private Pane makeBarPanel(String titleBarStyle) {
+        Pane barPanel = new Pane();
+        barPanel.getStyleClass().add(titleBarStyle);
+        barPanel.setPrefHeight(BAR_HEIGHT);
+        barPanel.relocate(0, 0);
+        barPanel.prefWidthProperty().bind(widthProperty());
+        return barPanel;
+    }
+
+    public StackPane getContentContainer() {
+        return contentPanel;
+    }
+
+    /**
+     * Get the value of nodeContent
+     *
+     * @return the value of nodeContent
+     */
+    public Node getNodeContent() {
+        return nodeContent;
+    }
+
+    public boolean isMenuButtonEnable() {
+        return commandsBox.isMenuButtonEnable();
+    }
 
 }
