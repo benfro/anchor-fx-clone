@@ -34,37 +34,31 @@ import net.benfro.fxgui.docks.node.ui.DockUIPanel;
  */
 public final class DockSubStation extends DockNode {
 
-    private final DockStation substation;
+   private final DockStation substation;
 
-    /**
-     * Get the value of station
-     *
-     * @return the value of station
-     */
+   public DockStation getSubStation() {
+      return substation;
+   }
 
-    public DockStation getSubStation() {
-        return substation;
-    }
+   public Window getStationWindow() {
+      return stationProperty().get().getStationScene().getWindow();
+   }
 
-    public Window getStationWindow() {
-        return stationProperty().get().getStationScene().getWindow();
-    }
+   public Scene getStationScene() {
+      return stationProperty().get().getStationScene();
+   }
 
-    public Scene getStationScene() {
-        return stationProperty().get().getStationScene();
-    }
-
-    public void putDock(DockNode dockNode, DockPosition position, double percentage) {
-        substation.add(dockNode);
-        substation.putDock(dockNode, position, percentage);
-        dockNode.stationProperty().set(substation);
-    }
+   public void putDock(DockNode dockNode, DockPosition position, double percentage) {
+      substation.add(dockNode);
+      substation.putDock(dockNode, position, percentage);
+      dockNode.stationProperty().set(substation);
+   }
 
 
-    public DockSubStation(DockUIPanel uiPanel) {
-        super(uiPanel);
-        substation = (DockStation) getContent().getNodeContent();
-        substation.markAsSubStation(this);
-    }
+   public DockSubStation(DockUIPanel uiPanel) {
+      super(uiPanel);
+      substation = (DockStation) getContent().getNodeContent();
+      substation.markAsSubStation(this);
+   }
 
 }
