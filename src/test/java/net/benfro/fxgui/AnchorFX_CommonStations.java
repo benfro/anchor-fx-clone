@@ -23,14 +23,15 @@
  */
 package net.benfro.fxgui;
 
-import com.anchorage.docks.node.DockNode;
-import com.anchorage.docks.stations.DockStation;
-import com.anchorage.system.AnchorageSystem;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.stage.Stage;
+import net.benfro.fxgui.docks.node.DockNode;
+import net.benfro.fxgui.docks.stations.DockStation;
+import net.benfro.fxgui.system.AnchorageSystem;
 
 import java.util.Random;
 
