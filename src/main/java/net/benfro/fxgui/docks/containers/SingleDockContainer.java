@@ -21,7 +21,6 @@ package net.benfro.fxgui.docks.containers;
 
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
-import net.benfro.fxgui.docks.containers.common.DockCommons;
 import net.benfro.fxgui.docks.containers.interfaces.DockContainableComponent;
 import net.benfro.fxgui.docks.containers.interfaces.DockContainer;
 import net.benfro.fxgui.docks.containers.subcontainers.DockSplitterContainer;
@@ -31,25 +30,24 @@ import net.benfro.fxgui.docks.stations.DockStation;
 
 public class SingleDockContainer extends StackPane implements DockContainer {
 
-    private DockContainer container;
+    private DockContainer parentContainer;
 
 
     @Override
-    public void putDock(DockNode node, DockNode.DockPosition position, double percentage) {
+    public void putDock(DockNode nodeToDock, DockNode.DockPosition position, double percentage) {
 
         if (getChildren().isEmpty()) {
-            getChildren().add(node);
-            node.setParentContainer(this);
+            getChildren().add(nodeToDock);
+            nodeToDock.setParentContainer(this);
         } else {
-            manageSubContainers(node, position, percentage);
+            manageSubContainers(nodeToDock, position, percentage);
         }
     }
 
-
     @Override
-    public void putDock(DockNode node, DockNode nodeTarget, DockNode.DockPosition position, double percentage) {
+    public void putDock(DockNode node, DockNode targetNode, DockNode.DockPosition position, double percentage) {
 
-        if (getChildren().get(0) == nodeTarget) {
+        if (getChildren().get(0) == targetNode) {
             manageSubContainers(node, position, percentage);
         }
     }
@@ -65,45 +63,43 @@ public class SingleDockContainer extends StackPane implements DockContainer {
     }
 
     @Override
-    public void removeNode(Node node) {
-        getChildren().remove(node);
-        ((DockContainableComponent) node).setParentContainer(null);
+    public void removeNode(Node nodeToRemove) {
+        getChildren().remove(nodeToRemove);
+        ((DockContainableComponent) nodeToRemove).setParentContainer(null);
     }
 
     @Override
-    public void insertNode(Node node, int index) {
-        getChildren().set(index, node);
-
-        ((DockContainableComponent) node).setParentContainer(this);
+    public void insertNode(Node nodeToInsert, int index) {
+        getChildren().set(index, nodeToInsert);
+        ((DockContainableComponent) nodeToInsert).setParentContainer(this);
     }
 
     @Override
-    public void undock(DockNode node) {
-        if (getChildren().get(0) == node) {
-            getChildren().remove(node);
-            node.setParentContainer(null);
+    public void undock(DockNode nodeToUndock) {
+        if (getChildren().get(0) == nodeToUndock) {
+            getChildren().remove(nodeToUndock);
+            nodeToUndock.setParentContainer(null);
         }
     }
 
-    private void manageSubContainers(DockNode node, DockNode.DockPosition position, double percentage) {
-        Node existNode = getChildren().get(0);
+    private void manageSubContainers(DockNode nodeToAdd, DockNode.DockPosition positionToDockTo, double percentage) {
+        Node existingNode = getChildren().get(0);
 
-        if (DockCommons.isABorderPosition(position)) {
-            getChildren().remove(existNode);
-            DockSplitterContainer splitter = DockCommons.createSplitter(existNode, node, position, percentage);
+        if (positionToDockTo.isAtBorder()) {
+            getChildren().remove(existingNode);
+            DockSplitterContainer splitter = DockSplitterContainer.createSplitter(existingNode, nodeToAdd, positionToDockTo, percentage);
             getChildren().add(splitter);
             splitter.setParentContainer(this);
-        } else if (existNode instanceof DockTabberContainer) {
-            DockTabberContainer tabber = (DockTabberContainer) existNode;
-            tabber.putDock(node, DockNode.DockPosition.CENTER, percentage);
-        } else if (existNode instanceof DockSplitterContainer) {
-            position = DockNode.DockPosition.BOTTOM;
-            DockSplitterContainer splitter = (DockSplitterContainer) existNode;
-            node.dock((DockStation) this, position);
+        } else if (existingNode instanceof DockTabberContainer) {
+            DockTabberContainer tabber = (DockTabberContainer) existingNode;
+            tabber.putDock(nodeToAdd, DockNode.DockPosition.CENTER, percentage);
+        } else if (existingNode instanceof DockSplitterContainer) {
+            positionToDockTo = DockNode.DockPosition.BOTTOM;
+            DockSplitterContainer splitter = (DockSplitterContainer) existingNode;
+            nodeToAdd.dock((DockStation) this, positionToDockTo);
         } else {
-            getChildren().remove(existNode);
-            DockTabberContainer tabber = DockCommons.createTabber(existNode, node, position);
-
+            getChildren().remove(existingNode);
+            DockTabberContainer tabber = DockTabberContainer.createTabber(existingNode, nodeToAdd, positionToDockTo);
             getChildren().add(tabber);
             tabber.setParentContainer(this);
         }
@@ -111,12 +107,12 @@ public class SingleDockContainer extends StackPane implements DockContainer {
 
     @Override
     public void setParentContainer(DockContainer container) {
-        this.container = container;
+        this.parentContainer = container;
     }
 
     @Override
     public DockContainer getParentContainer() {
-        return container;
+        return parentContainer;
     }
 
 }

@@ -19,10 +19,10 @@
 
 package net.benfro.fxgui.docks.containers.subcontainers;
 
+import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
-import net.benfro.fxgui.docks.containers.common.DockCommons;
 import net.benfro.fxgui.docks.containers.interfaces.DockContainableComponent;
 import net.benfro.fxgui.docks.containers.interfaces.DockContainer;
 import net.benfro.fxgui.docks.node.DockNode;
@@ -32,14 +32,40 @@ import net.benfro.fxgui.docks.node.DockNode;
  */
 public final class DockSplitterContainer extends SplitPane implements DockContainer {
 
-    private DockContainer container;
+   public static DockSplitterContainer createEmptySplitter() {
+      return new DockSplitterContainer();
+   }
 
+   public static DockSplitterContainer createSplitter(Node existNode, Node newNode, DockNode.DockPosition position, double percentage) {
+      DockSplitterContainer splitter = createEmptySplitter();
+
+      if (position == DockNode.DockPosition.BOTTOM || position == DockNode.DockPosition.TOP) {
+         splitter.setOrientation(Orientation.VERTICAL);
+      }
+
+      DockContainableComponent existContainableComponent = (DockContainableComponent) existNode;
+      DockContainableComponent newContainableComponent = (DockContainableComponent) newNode;
+
+      existContainableComponent.setParentContainer(splitter);
+      newContainableComponent.setParentContainer(splitter);
+
+      if (position == DockNode.DockPosition.BOTTOM || position == DockNode.DockPosition.RIGHT) {
+         splitter.getItems().addAll(existNode, newNode);
+      } else {
+         splitter.getItems().addAll(newNode, existNode);
+      }
+
+      splitter.getStyleClass().add("docknode-split-pane");
+      splitter.setDividerPositions(percentage);
+      return splitter;
+   }
+
+    private DockContainer container;
 
     @Override
     public void putDock(DockNode node, DockNode.DockPosition position, double percentage) {
         // NOTHING
     }
-
 
     @Override
     public void putDock(DockNode node, DockNode nodeTarget, DockNode.DockPosition position, double percentage) {
@@ -47,9 +73,9 @@ public final class DockSplitterContainer extends SplitPane implements DockContai
         // get index of current node target
         int indexOfTarget = getItems().indexOf(nodeTarget);
 
-        if (DockCommons.isABorderPosition(position)) {
+       if (position.isAtBorder()) {
             // create a splitter with node and nodeTarget
-            DockSplitterContainer splitter = DockCommons.createSplitter(nodeTarget, node, position, percentage);
+          DockSplitterContainer splitter = createSplitter(nodeTarget, node, position, percentage);
 
             getChildren().add(splitter);
             splitter.setParentContainer(this);
@@ -57,7 +83,7 @@ public final class DockSplitterContainer extends SplitPane implements DockContai
             // set the splitter on index of target
             getItems().set(indexOfTarget, splitter);
         } else {
-            DockTabberContainer tabber = DockCommons.createTabber(nodeTarget, node, position);
+          DockTabberContainer tabber = DockTabberContainer.createTabber(nodeTarget, node, position);
             getChildren().add(tabber);
             tabber.setParentContainer(this);
             getItems().set(indexOfTarget, tabber);

@@ -46,7 +46,7 @@ import net.benfro.fxgui.system.AnchorageSystem;
 
 import java.util.Objects;
 
-import static net.benfro.fxgui.docks.containers.common.AnchorageSettings.*;
+import static net.benfro.fxgui.docks.containers.common.AnchorageSettings.FLOATING_NODE_DROPSHADOW_RADIUS;
 
 /**
  * @author Alessio
@@ -58,7 +58,11 @@ public class DockNode extends StackPane implements DockContainableComponent {
       RIGHT,
       TOP,
       BOTTOM,
-      CENTER
+      CENTER;
+
+      public boolean isAtBorder() {
+         return this != CENTER;
+      }
    }
 
    private DockUIPanel content;

@@ -26,7 +26,8 @@ import net.benfro.fxgui.docks.node.DockNode;
  * @author Alessio
  */
 public interface DockContainer extends DockContainableComponent {
-    public void putDock(DockNode node, DockNode.DockPosition position, double percentage);
+
+   public void putDock(DockNode node, DockNode.DockPosition position, double percentage);
 
     public void putDock(DockNode node, DockNode nodeTarget, DockNode.DockPosition position, double percentage);
 
@@ -39,5 +40,4 @@ public interface DockContainer extends DockContainableComponent {
     public void removeNode(Node node);
 
     public boolean isDockVisible(DockNode node);
-
 }

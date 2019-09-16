@@ -16,11 +16,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301  USA
  */
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.benfro.fxgui.docks.containers;
 
 import javafx.event.EventHandler;
@@ -49,7 +44,6 @@ import static net.benfro.fxgui.docks.containers.common.AnchorageSettings.*;
  */
 public class StageFloatable extends Stage {
 
-    private Scene scene;
     private DockNode node;
     private StackPane transparentRootPanel;
     private StackPane stackPanelContainer;
@@ -65,11 +59,8 @@ public class StageFloatable extends Stage {
     private double startHeight;
 
     private ImageView imageView;
-    private WritableImage ghostImage;
 
-    private StageFloatable() {
-
-    }
+    private StageFloatable() { /* Empty */ }
 
     public StageFloatable(DockNode node, Window owner, double startX, double startY) {
         this.node = node;
@@ -203,7 +194,7 @@ public class StageFloatable extends Stage {
 
         initStyle(StageStyle.TRANSPARENT);
 
-        scene = new Scene(transparentRootPanel, node.getWidth() + FLOATING_NODE_DROPSHADOW_RADIUS * 2,
+        Scene scene = new Scene(transparentRootPanel, node.getWidth() + FLOATING_NODE_DROPSHADOW_RADIUS * 2,
                 node.getHeight() + FLOATING_NODE_DROPSHADOW_RADIUS * 2,
                 Color.TRANSPARENT);
 
@@ -220,7 +211,7 @@ public class StageFloatable extends Stage {
 
     private void createContainerPanel() {
 
-        ghostImage = node.snapshot(new SnapshotParameters(), null);
+        WritableImage ghostImage = node.snapshot(new SnapshotParameters(), null);
 
         imageView = new ImageView(ghostImage);
 

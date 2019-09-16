@@ -39,222 +39,217 @@ import java.util.Optional;
  */
 public final class DockStation extends SingleDockContainer {
 
-    private final List<DockNode> nodes;
-    private DockZones dockZones;
-    private DockNode currentNodeTarget;
+   private final List<DockNode> nodes;
+   private DockZones dockZones;
+   private DockNode currentNodeTarget;
 
-    private Node currentNodeBeforeMaximization;
-    private DockNode currentNodeMaximized;
-    private Parent currentNodeMaximizedParent;
-    private boolean substation;
+   private Node currentNodeBeforeMaximization;
+   private DockNode currentNodeMaximized;
+   private Parent currentNodeMaximizedParent;
+   private boolean substation;
 
-    private DockSubStation dockNodeForSubstation;
+   private DockSubStation dockNodeForSubstation;
 
-    private boolean commonStation;
+   private boolean commonStation;
 
-    private boolean selected = false;
+   private boolean selected = false;
 
-    /**
-     * Get the value of selected
-     *
-     * @return the value of selected
-     */
-    public boolean isSelected() {
-        return selected;
-    }
+   public DockStation() {
+      nodes = new ArrayList<>();
+      substation = false;
+      buildUI();
+   }
 
-    public DockStation() {
-        nodes = new ArrayList<>();
-        substation = false;
-        buildUI();
-    }
+   public DockStation(boolean commonStation) {
+      this();
+      this.commonStation = commonStation;
+   }
 
-    public DockStation(boolean commonStation) {
-        this();
-        this.commonStation = commonStation;
-    }
+   public boolean isSelected() {
+      return selected;
+   }
 
-    public boolean isCommonStation() {
-        return commonStation;
-    }
+   public boolean isCommonStation() {
+      return commonStation;
+   }
 
-    private void buildUI() {
-        getStyleClass().add("station");
-    }
+   private void buildUI() {
+      getStyleClass().add("station");
+   }
 
-    public Window getStationWindow() {
-        return getStationScene().getWindow();
-    }
+   public Window getStationWindow() {
+      return getStationScene().getWindow();
+   }
 
-    public Scene getStationScene() {
-        return getScene();
-    }
+   public Scene getStationScene() {
+      return getScene();
+   }
 
-    public boolean isInnerPosition(double x, double y) {
+   public boolean isInnerPosition(double x, double y) {
 
-        Window window = getStationWindow();
-        Rectangle bounds = new Rectangle(window.getX(), window.getY(), window.getWidth(), window.getHeight());
-        return bounds.contains(x, y);
-    }
+      Window window = getStationWindow();
+      Rectangle bounds = new Rectangle(window.getX(), window.getY(), window.getWidth(), window.getHeight());
+      return bounds.contains(x, y);
+   }
 
-    public void prepareZones(DockNode nodeToMove) {
+   public void prepareZones(DockNode nodeToMove) {
 
-        if (currentNodeMaximized == null) {
-            dockZones = new DockZones(this, nodeToMove);
-            dockZones.showZones();
-        }
+      if (currentNodeMaximized == null) {
+         dockZones = new DockZones(this, nodeToMove);
+         dockZones.showZones();
+      }
 
-    }
+   }
 
-    public boolean isSubStation() {
-        return substation;
-    }
+   public boolean isSubStation() {
+      return substation;
+   }
 
-    public void add(DockNode node) {
-        if (!nodes.contains(node)) {
-            nodes.add(node);
-        }
-    }
+   public void add(DockNode node) {
+      if (!nodes.contains(node)) {
+         nodes.add(node);
+      }
+   }
 
-    public void remove(DockNode node) {
-        if (nodes.contains(node)) {
-            nodes.remove(node);
-            node.stationProperty().set(null);
-        }
-    }
+   public void remove(DockNode node) {
+      if (nodes.contains(node)) {
+         nodes.remove(node);
+         node.stationProperty().set(null);
+      }
+   }
 
-    public void searchTargetNode(double x, double y) {
+   public void searchTargetNode(double x, double y) {
 
-        selected = false;
+      selected = false;
 
-        if (currentNodeMaximized != null) {
-            return;
-        }
+      if (currentNodeMaximized != null) {
+         return;
+      }
 
-        Optional<DockNode> nodeTarget = nodes.stream()
-                .filter(node
-                        -> !node.floatingProperty().get()
-                        && node.checkForTarget(x, y)
-                        && node.isDockVisible()).findFirst();
+      Optional<DockNode> nodeTarget = nodes.stream()
+              .filter(node
+                      -> !node.floatingProperty().get()
+                      && node.checkForTarget(x, y)
+                      && node.isDockVisible()).findFirst();
 
-        nodeTarget.map(node -> (Runnable) () -> {
+      nodeTarget.map(node -> (Runnable) () -> {
 
-            currentNodeTarget = node;
-            dockZones.moveAt(node);
+         currentNodeTarget = node;
+         dockZones.moveAt(node);
 
-        }).orElse((Runnable) () -> {
+      }).orElse((Runnable) () -> {
 
-            if (currentNodeTarget != null) {
-                dockZones.hideCircleZones();
+         if (currentNodeTarget != null) {
+            dockZones.hideCircleZones();
 
-            }
+         }
 
-        }).run();
+      }).run();
 
-        selected = dockZones.searchArea(x, y);
-    }
+      selected = dockZones.searchArea(x, y);
+   }
 
-    public void addOverlay(Node node) {
-        getChildren().add(node);
-    }
+   public void addOverlay(Node node) {
+      getChildren().add(node);
+   }
 
-    public void removeOverlay(Node node) {
-        getChildren().remove(node);
-    }
+   public void removeOverlay(Node node) {
+      getChildren().remove(node);
+   }
 
-    public void hideZones() {
-        dockZones.close();
-    }
+   public void hideZones() {
+      dockZones.close();
+   }
 
-    private void manageDragOnSameNode() {
+   private void manageDragOnSameNode() {
 
-        DockTabberContainer tabContainer = (DockTabberContainer) dockZones.getCurrentNodeTarget().getParentContainer();
-        tabContainer.manageDragOnSameNode(dockZones.getCurrentNodeTarget(), dockZones.getCurrentPosition());
-    }
+      DockTabberContainer tabContainer = (DockTabberContainer) dockZones.getCurrentNodeTarget().getParentContainer();
+      tabContainer.manageDragOnSameNode(dockZones.getCurrentNodeTarget(), dockZones.getCurrentPosition());
+   }
 
-    public void finalizeDrag() {
+   public void finalizeDrag() {
 
-        if (currentNodeMaximized != null) {
-            return;
-        }
+      if (currentNodeMaximized != null) {
+         return;
+      }
 
-        ZoneSelector selector = dockZones.getCurrentZoneSelector();
+      ZoneSelector selector = dockZones.getCurrentZoneSelector();
 
-        if (selector == null) {
-            dockZones.getNodeSource().makeNodeActiveOnFloatableStage(getScene().getWindow(), getScene().getX(), getScene().getY());
-        } else {
-            DockNode.DockPosition position = selector.getPosition();
-            if (selector.isStationZone()) {
-                dockZones.getNodeSource().undock();
-                dockZones.getNodeSource().dock(this, position);
-            } else {
-                manageDockDestination();
-            }
-        }
-
-    }
-
-    public void closeZones() {
-        dockZones.close();
-    }
-
-    private void manageDockDestination() {
-
-        if (dockZones.getCurrentNodeTarget() == dockZones.getNodeSource()) {
-            if (dockZones.getCurrentNodeTarget().getParentContainer() instanceof DockTabberContainer
-                    && dockZones.getCurrentPosition() != DockNode.DockPosition.CENTER) {
-                manageDragOnSameNode();
-            } else {
-                dockZones.getNodeSource().restore();
-            }
-        } else {
+      if (selector == null) {
+         dockZones.getNodeSource().makeNodeActiveOnFloatableStage(getScene().getWindow(), getScene().getX(), getScene().getY());
+      } else {
+         DockNode.DockPosition position = selector.getPosition();
+         if (selector.isStationZone()) {
             dockZones.getNodeSource().undock();
-            dockZones.getNodeSource().dock(dockZones.getCurrentNodeTarget(), dockZones.getCurrentPosition());
-        }
-    }
+            dockZones.getNodeSource().dock(this, position);
+         } else {
+            manageDockDestination();
+         }
+      }
 
-    public boolean maximize(DockNode node) {
+   }
 
-        if (!node.maximizingProperty().get() && getChildren().get(0) != node) {
-            currentNodeBeforeMaximization = getChildren().get(0);
+   public void closeZones() {
+      dockZones.close();
+   }
 
-            getChildren().remove(0);
+   private void manageDockDestination() {
 
-            currentNodeMaximizedParent = node.getParent();
+      if (dockZones.getCurrentNodeTarget() == dockZones.getNodeSource()) {
+         if (dockZones.getCurrentNodeTarget().getParentContainer() instanceof DockTabberContainer
+                 && dockZones.getCurrentPosition() != DockNode.DockPosition.CENTER) {
+            manageDragOnSameNode();
+         } else {
+            dockZones.getNodeSource().restore();
+         }
+      } else {
+         dockZones.getNodeSource().undock();
+         dockZones.getNodeSource().dock(dockZones.getCurrentNodeTarget(), dockZones.getCurrentPosition());
+      }
+   }
 
-            getChildren().add(node);
+   public boolean maximize(DockNode node) {
 
-            currentNodeMaximized = node;
+      if (!node.maximizingProperty().get() && getChildren().get(0) != node) {
+         currentNodeBeforeMaximization = getChildren().get(0);
 
-            return true;
-        }
-        return false;
-    }
+         getChildren().remove(0);
 
-    public boolean restore(DockNode node) {
-        if (currentNodeMaximized != null && currentNodeMaximized == node) {
-            Pane panelParent = (Pane) currentNodeMaximizedParent;
-            panelParent.getChildren().add(currentNodeMaximized);
+         currentNodeMaximizedParent = node.getParent();
 
-            getChildren().add(currentNodeBeforeMaximization);
+         getChildren().add(node);
 
-            currentNodeMaximized = null;
-            currentNodeBeforeMaximization = null;
+         currentNodeMaximized = node;
 
-            return true;
-        } else {
-            return false;
-        }
+         return true;
+      }
+      return false;
+   }
 
-    }
+   public boolean restore(DockNode node) {
+      if (currentNodeMaximized != null && currentNodeMaximized == node) {
+         Pane panelParent = (Pane) currentNodeMaximizedParent;
+         panelParent.getChildren().add(currentNodeMaximized);
 
-    public void markAsSubStation(DockSubStation dockNodeForSubstation) {
-        substation = true;
-        this.dockNodeForSubstation = dockNodeForSubstation;
-    }
+         getChildren().add(currentNodeBeforeMaximization);
 
-    public DockSubStation getDockNodeForSubStation() {
-        return dockNodeForSubstation;
-    }
+         currentNodeMaximized = null;
+         currentNodeBeforeMaximization = null;
+
+         return true;
+      } else {
+         return false;
+      }
+
+   }
+
+   public void markAsSubStation(DockSubStation dockNodeForSubstation) {
+      substation = true;
+      this.dockNodeForSubstation = dockNodeForSubstation;
+   }
+
+   public DockSubStation getDockNodeForSubStation() {
+      return dockNodeForSubstation;
+   }
 
 }
