@@ -96,7 +96,7 @@ public class SingleDockContainer extends StackPane implements DockContainer {
         } else if (existingNode instanceof DockSplitterContainer) {
             positionToDockTo = DockNode.DockPosition.BOTTOM;
             DockSplitterContainer splitter = (DockSplitterContainer) existingNode;
-            nodeToAdd.dock((DockStation) this, positionToDockTo);
+            nodeToAdd.dockTo((DockStation) this, positionToDockTo);
         } else {
             getChildren().remove(existingNode);
             DockTabberContainer tabber = DockTabberContainer.createTabber(existingNode, nodeToAdd, positionToDockTo);

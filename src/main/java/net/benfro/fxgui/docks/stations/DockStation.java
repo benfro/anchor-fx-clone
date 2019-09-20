@@ -181,7 +181,7 @@ public final class DockStation extends SingleDockContainer {
          DockNode.DockPosition position = selector.getPosition();
          if (selector.isStationZone()) {
             dockZones.getNodeSource().undock();
-            dockZones.getNodeSource().dock(this, position);
+            dockZones.getNodeSource().dockTo(this, position);
          } else {
             manageDockDestination();
          }
@@ -204,7 +204,7 @@ public final class DockStation extends SingleDockContainer {
          }
       } else {
          dockZones.getNodeSource().undock();
-         dockZones.getNodeSource().dock(dockZones.getCurrentNodeTarget(), dockZones.getCurrentPosition());
+         dockZones.getNodeSource().dockTo(dockZones.getCurrentNodeTarget(), dockZones.getCurrentPosition());
       }
    }
 

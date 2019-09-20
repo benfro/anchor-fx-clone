@@ -125,6 +125,9 @@ public final class DockUIPanel extends Pane {
     }
 
     private void manageDragEvent(MouseEvent event) {
+        if (!node.floatableProperty().get()) {
+            return;
+        }
         if (!node.draggingProperty().get()) {
 
             if (!node.maximizingProperty().get()) {

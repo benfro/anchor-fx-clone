@@ -306,7 +306,7 @@ public class DockNode extends StackPane implements DockContainableComponent {
       this.station.set((DockStation) station);
    }
 
-   public void dock(DockStation station, DockPosition position) {
+   public void dockTo(DockStation station, DockPosition position) {
 
       if (stationProperty().get() != null) {
          ensureVisibility();
@@ -318,7 +318,7 @@ public class DockNode extends StackPane implements DockContainableComponent {
       this.station.set((DockStation) station);
    }
 
-   public void dock(DockNode nodeTarget, DockPosition position) {
+   public void dockTo(DockNode nodeTarget, DockPosition position) {
 
       if (stationProperty().get() != null) {
          ensureVisibility();
@@ -330,7 +330,7 @@ public class DockNode extends StackPane implements DockContainableComponent {
       station.set(nodeTarget.station.get());
    }
 
-   public void dock(DockStation station, DockPosition position, double percentage) {
+   public void dockTo(DockStation station, DockPosition position, double percentage) {
 
       if (stationProperty().get() != null) {
          ensureVisibility();
@@ -341,7 +341,7 @@ public class DockNode extends StackPane implements DockContainableComponent {
       this.station.set((DockStation) station);
    }
 
-   public void dock(DockNode nodeTarget, DockPosition position, double percentage) {
+   public void dockTo(DockNode nodeTarget, DockPosition position, double percentage) {
 
       if (stationProperty().get() != null) {
          ensureVisibility();
@@ -353,7 +353,7 @@ public class DockNode extends StackPane implements DockContainableComponent {
       station.set(nodeTarget.station.get());
    }
 
-   public void dock(DockSubStation subStation, DockPosition position) {
+   public void dockTo(DockSubStation subStation, DockPosition position) {
 
       if (stationProperty().get() != null) {
          ensureVisibility();
@@ -363,7 +363,7 @@ public class DockNode extends StackPane implements DockContainableComponent {
       subStation.putDock(this, position, 0.5);
    }
 
-   public void dock(DockSubStation subStation, DockPosition position, double percentage) {
+   public void dockTo(DockSubStation subStation, DockPosition position, double percentage) {
 
       if (stationProperty().get() != null) {
          ensureVisibility();

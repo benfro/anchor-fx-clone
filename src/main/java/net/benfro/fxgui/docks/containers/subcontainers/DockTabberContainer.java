@@ -197,7 +197,7 @@ public final class DockTabberContainer extends TabPane implements DockContainer 
         if (getTabByNode(node) != null && getTabs().size() == 2) {
             DockNode otherNode = (getTabs().get(0).getContent() == node) ? (DockNode) getTabs().get(1).getContent() : (DockNode) getTabs().get(0).getContent();
             node.undock();
-            node.dock(otherNode, position);
+            node.dockTo(otherNode, position);
         } else if (getTabByNode(node) != null && getTabs().size() > 2) {
 
             node.undock();
